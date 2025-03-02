@@ -1,0 +1,290 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-size: var(--body-text-size);
+  font-weight: var(--body-font-weight);
+}
+
+button {
+  border: none;
+  cursor: pointer;
+  font-size: var(--button-text-size);
+  font-weight: var(--button-font-weight);
+  background-color: var(--lotto-primary-color);
+  color: var(--lotto-greyscale-1-color);
+  border-radius: var(--border-radius);
+}
+
+button:hover,
+button:active {
+  background-color: var(--lotto-active-color);
+}
+
+li {
+  list-style-type: none;
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  width: 414px;
+  height: 727px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 16px;
+}
+
+.hidden {
+  display: none;
+}
+
+:root {
+  --lotto-primary-color: #4e5ba6;
+  --lotto-active-color: #354188;
+  --lotto-greyscale-1-color: #ffffff;
+  --lotto-greyscale-2-color: #fcfcfd;
+  --lotto-greyscale-3-color: #b4b4b4;
+  --lotto-greyscale-4-color: #8b8b8b;
+  --lotto-greyscale-5-color: #000000;
+
+  --border-color: rgba(0, 0, 0, 0.12);
+  --border-radius: 4px;
+
+  --body-text-size: 15px;
+  --body-font-weight: 400;
+
+  --button-text-size: 14px;
+  --button-font-weight: 700;
+}
+.lotto-header {
+  display: flex;
+  width: 100%;
+  height: 64px;
+  align-items: center;
+  padding-left: 130px;
+  background-color: var(--lotto-primary-color);
+  position: fixed;
+  top: 0;
+}
+
+.lotto-header__title {
+  color: var(--lotto-greyscale-1-color);
+}
+footer {
+  width: 100%;
+  height: 80px;
+  font-size: 14px;
+  font-weight: 700;
+  border-top: 1px solid rgba(78, 91, 166, 0.2);
+  color: var(--lotto-primary-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  bottom: 0;
+}
+.lotto-purchase__title {
+  padding: 20px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.lotto-purchase__description {
+  padding-top: 8px;
+}
+
+.lotto-purchase__form {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 4px;
+}
+
+.lotto-purchase__input {
+  width: 310px;
+  height: 36px;
+  border: 1px solid var(--lotto-greyscale-3-color);
+  border-radius: var(--border-radius);
+  padding: 10px;
+}
+
+.lotto-purchase__input::placeholder {
+  font-size: var(--body-text-size);
+  color: var(--lotto-greyscale-4-color);
+}
+
+.lotto-purchase__button {
+  width: 56px;
+  height: 36px;
+}
+
+.lotto-purchase__error {
+  color: rgb(255, 46, 46);
+  margin-top: 6px;
+}
+.issued-lotto {
+  display: flex;
+  flex-direction: column;
+  padding: 28px 0;
+  gap: 8px;
+}
+
+.issued-lotto__description {
+  height: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.issued-lotto__list {
+  height: 276px;
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.issued-lotto__list li span:nth-child(1) {
+  font-size: 34px;
+}
+
+.issued-lotto__item {
+  width: 238px;
+  height: 36px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+.winning-lotto {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.winning-lotto__description {
+  margin: 3px 0 3px 0;
+}
+
+.winning-lotto__numbers {
+  display: flex;
+  justify-content: space-between;
+  margin: 12px 0 8px 0;
+}
+
+.winning-lotto__form {
+  height: 100px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  justify-content: space-between;
+}
+
+.winning-lotto__inputs {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.winning-lotto__input {
+  width: 34px;
+  height: 36px;
+  border: 1px solid var(--lotto-greyscale-3-color);
+  border-radius: var(--border-radius);
+}
+
+.winning-lotto__winning-numbers {
+  display: flex;
+  gap: 8px;
+}
+
+.winning-lotto__result-button {
+  width: 382px;
+  height: 36px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.winning-lotto__error {
+  color: rgb(255, 46, 46);
+  margin-top: 6px;
+}
+.lotto-result {
+  z-index: 100;
+  width: 350px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 16px;
+  background-color: var(--lotto-greyscale-1-color);
+  border: none;
+  border-radius: var(--border-radius);
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+}
+
+.lotto-result__close-button {
+  background-color: transparent;
+  margin-bottom: 10px;
+}
+
+.lotto-result__close-button:hover,
+.lotto-result__close-button:active {
+  background-color: transparent;
+}
+
+.lotto-result__close-button img {
+  width: 14px;
+  height: 14px;
+  float: right;
+}
+
+.lotto-result__title {
+  display: flex;
+  justify-content: center;
+}
+
+.lotto-result__statistics {
+  margin-top: 33px;
+  width: 100%;
+  height: 100%;
+  border-top: 1px solid var(--border-color);
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 13px;
+  text-align: center;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.lotto-result__profit {
+  display: flex;
+  justify-content: center;
+  font-weight: 700;
+  margin: 32px 0;
+}
+
+.lotto-result__restart-button {
+  height: 36px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16px;
+}
