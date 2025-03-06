@@ -6,7 +6,7 @@ var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read fr
 var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
 var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "access private method"), method);
-var _LottoPurchase_instances, handleSubmit_fn, handleValidation_fn, _WinningLotto_instances, setFormEventListeners_fn, setInputEventListeners_fn, handleSubmit_fn2, handleValidation_fn2, getWinningAndBonusNumbers_fn, _LottoResult_instances, manageEventListeners_fn, closeDialog_fn, restartGame_fn, _lottos, _statistics, _WinningStatistics_instances, calculateBonusNumber_fn, addMatchedCount_fn, _LottoController_instances, setEvent_fn, handlePurchase_fn, setPurchaseAmount_fn, updateIssuedLotto_fn, initWinningLotto_fn, handleResult_fn, calculateWinningStatistics_fn, calculateProfitRatio_fn, showResult_fn, handleRestart_fn;
+var _lottos, _statistics, _WinningStatistics_instances, calculateBonusNumber_fn, addMatchedCount_fn, _purchaseAmount, _lottos2, _LottoPurchase_instances, handleSubmit_fn, handleValidation_fn, _WinningLotto_instances, setFormEventListeners_fn, setInputEventListeners_fn, handleSubmit_fn2, handleValidation_fn2, getWinningAndBonusNumbers_fn, _LottoResult_instances, manageEventListeners_fn, closeDialog_fn, restartGame_fn, _LottoController_instances, setEvent_fn, handlePurchase_fn, handleResult_fn, handleRestart_fn;
 (function polyfill() {
   const relList = document.createElement("link").relList;
   if (relList && relList.supports && relList.supports("modulepreload")) {
@@ -44,6 +44,11 @@ var _LottoPurchase_instances, handleSubmit_fn, handleValidation_fn, _WinningLott
     fetch(link.href, fetchOpts);
   }
 })();
+const getUniqueRandomNumbers = (min, max, count) => {
+  const numbers = Array.from({ length: max - min + 1 }, (_, i) => i + min);
+  numbers.sort(() => Math.random() - 0.5);
+  return numbers.slice(0, count);
+};
 const MIN_UNIT = 1e3;
 const MAX_AMOUNT = 1e5;
 const MIN_LOTTO_NUMBER = 1;
@@ -101,6 +106,136 @@ const CUSTOM_ELEMENTS = Object.freeze({
   lottoResult: "lotto-result",
   lottoFooter: "lotto-footer"
 });
+const issueLottos = (purchaseAmount) => {
+  const lottoCount = purchaseAmount / MIN_UNIT;
+  return Array.from({ length: lottoCount }, () => {
+    return getUniqueRandomNumbers(
+      MIN_LOTTO_NUMBER,
+      MAX_LOTTO_NUMBER,
+      LOTTO_LENGTH
+    ).sort((a, b) => a - b);
+  });
+};
+const countMatchingNumbers = (referenceArray, checkingArray) => {
+  return checkingArray.filter((number) => referenceArray.includes(number)).length;
+};
+const createWinningStatisticsMap = (counts = {}) => {
+  return /* @__PURE__ */ new Map([
+    [
+      MATCH_KEY.THREE,
+      {
+        count: counts[MATCH_KEY.THREE] ?? 0,
+        amount: MATCH_PRIZE[MATCH_KEY.THREE]
+      }
+    ],
+    [
+      MATCH_KEY.FOUR,
+      {
+        count: counts[MATCH_KEY.FOUR] ?? 0,
+        amount: MATCH_PRIZE[MATCH_KEY.FOUR]
+      }
+    ],
+    [
+      MATCH_KEY.FIVE,
+      {
+        count: counts[MATCH_KEY.FIVE] ?? 0,
+        amount: MATCH_PRIZE[MATCH_KEY.FIVE]
+      }
+    ],
+    [
+      MATCH_KEY.FIVE_AND_BONUS,
+      {
+        count: counts[MATCH_KEY.FIVE_AND_BONUS] ?? 0,
+        amount: MATCH_PRIZE[MATCH_KEY.FIVE_AND_BONUS]
+      }
+    ],
+    [
+      MATCH_KEY.SIX,
+      {
+        count: counts[MATCH_KEY.SIX] ?? 0,
+        amount: MATCH_PRIZE[MATCH_KEY.SIX]
+      }
+    ]
+  ]);
+};
+class WinningStatistics {
+  constructor(lottos) {
+    __privateAdd(this, _WinningStatistics_instances);
+    __privateAdd(this, _lottos, []);
+    __privateAdd(this, _statistics, createWinningStatisticsMap());
+    __privateSet(this, _lottos, lottos);
+  }
+  get statistics() {
+    return new Map(__privateGet(this, _statistics));
+  }
+  calculateProfitRatio(purchaseAmount) {
+    const profitAmount = Array.from(__privateGet(this, _statistics).values()).reduce(
+      (sum, { count, amount }) => sum + count * amount,
+      0
+    );
+    const PERCENTAGE = 100;
+    const DECIMAL_POINT = 1;
+    return (profitAmount / purchaseAmount * PERCENTAGE).toLocaleString(
+      "ko-KR",
+      {
+        minimumFractionDigits: DECIMAL_POINT,
+        maximumFractionDigits: DECIMAL_POINT
+      }
+    );
+  }
+  calculateWinningResults(winningNumbers, bonusNumber) {
+    __privateGet(this, _lottos).forEach((lotto) => {
+      const matchedCount = countMatchingNumbers(winningNumbers, lotto);
+      if (matchedCount === MATCH_KEY.FIVE) {
+        __privateMethod(this, _WinningStatistics_instances, addMatchedCount_fn).call(this, __privateMethod(this, _WinningStatistics_instances, calculateBonusNumber_fn).call(this, lotto, bonusNumber));
+        return;
+      }
+      __privateMethod(this, _WinningStatistics_instances, addMatchedCount_fn).call(this, matchedCount);
+    });
+  }
+}
+_lottos = new WeakMap();
+_statistics = new WeakMap();
+_WinningStatistics_instances = new WeakSet();
+calculateBonusNumber_fn = function(lotto, bonusNumber) {
+  if (lotto.includes(bonusNumber)) return MATCH_KEY.FIVE_AND_BONUS;
+  return MATCH_KEY.FIVE;
+};
+addMatchedCount_fn = function(matchedCount) {
+  if (matchedCount >= MATCH_KEY.THREE) {
+    __privateGet(this, _statistics).set(matchedCount, {
+      ...__privateGet(this, _statistics).get(matchedCount),
+      count: __privateGet(this, _statistics).get(matchedCount).count + 1
+    });
+  }
+};
+class LottoDomain {
+  constructor() {
+    __privateAdd(this, _purchaseAmount);
+    __privateAdd(this, _lottos2);
+    __privateSet(this, _purchaseAmount, 0);
+    __privateSet(this, _lottos2, []);
+  }
+  get lottos() {
+    return __privateGet(this, _lottos2);
+  }
+  setPurchaseAmount(amount) {
+    __privateSet(this, _purchaseAmount, amount);
+  }
+  issueLottos() {
+    __privateSet(this, _lottos2, issueLottos(__privateGet(this, _purchaseAmount)));
+  }
+  calculateWinningStatistics(winningNumbers, bonusNumber) {
+    const winningStatistics = new WinningStatistics(__privateGet(this, _lottos2));
+    winningStatistics.calculateWinningResults(winningNumbers, bonusNumber);
+    return {
+      statistics: winningStatistics.statistics,
+      profitRatio: winningStatistics.calculateProfitRatio(__privateGet(this, _purchaseAmount))
+    };
+  }
+}
+_purchaseAmount = new WeakMap();
+_lottos2 = new WeakMap();
 class BaseWebComponent extends HTMLElement {
   constructor() {
     super();
@@ -451,45 +586,6 @@ getWinningAndBonusNumbers_fn = function() {
   return { winningNumbersInput, bonusNumberInput };
 };
 customElements.define(CUSTOM_ELEMENTS.winningLotto, WinningLotto);
-const createWinningStatisticsMap = (counts = {}) => {
-  return /* @__PURE__ */ new Map([
-    [
-      MATCH_KEY.THREE,
-      {
-        count: counts[MATCH_KEY.THREE] ?? 0,
-        amount: MATCH_PRIZE[MATCH_KEY.THREE]
-      }
-    ],
-    [
-      MATCH_KEY.FOUR,
-      {
-        count: counts[MATCH_KEY.FOUR] ?? 0,
-        amount: MATCH_PRIZE[MATCH_KEY.FOUR]
-      }
-    ],
-    [
-      MATCH_KEY.FIVE,
-      {
-        count: counts[MATCH_KEY.FIVE] ?? 0,
-        amount: MATCH_PRIZE[MATCH_KEY.FIVE]
-      }
-    ],
-    [
-      MATCH_KEY.FIVE_AND_BONUS,
-      {
-        count: counts[MATCH_KEY.FIVE_AND_BONUS] ?? 0,
-        amount: MATCH_PRIZE[MATCH_KEY.FIVE_AND_BONUS]
-      }
-    ],
-    [
-      MATCH_KEY.SIX,
-      {
-        count: counts[MATCH_KEY.SIX] ?? 0,
-        amount: MATCH_PRIZE[MATCH_KEY.SIX]
-      }
-    ]
-  ]);
-};
 class LottoResult extends BaseWebComponent {
   constructor() {
     super();
@@ -592,82 +688,24 @@ class View {
     <lotto-footer></lotto-footer>
     `;
   }
-}
-const getUniqueRandomNumbers = (min, max, count) => {
-  const numbers = Array.from({ length: max - min + 1 }, (_, i) => i + min);
-  numbers.sort(() => Math.random() - 0.5);
-  return numbers.slice(0, count);
-};
-const issueLottos = (purchaseAmount) => {
-  const lottoCount = purchaseAmount / MIN_UNIT;
-  return Array.from({ length: lottoCount }, () => {
-    return getUniqueRandomNumbers(
-      MIN_LOTTO_NUMBER,
-      MAX_LOTTO_NUMBER,
-      LOTTO_LENGTH
-    ).sort((a, b) => a - b);
-  });
-};
-const countMatchingNumbers = (referenceArray, checkingArray) => {
-  return checkingArray.filter((number) => referenceArray.includes(number)).length;
-};
-class WinningStatistics {
-  constructor(lottos) {
-    __privateAdd(this, _WinningStatistics_instances);
-    __privateAdd(this, _lottos, []);
-    __privateAdd(this, _statistics, createWinningStatisticsMap());
-    __privateSet(this, _lottos, lottos);
+  updateIssuedLotto(lottos) {
+    const issuedLotto = $(CUSTOM_ELEMENTS.issuedLotto, this.app);
+    issuedLotto.updateLottos(lottos);
   }
-  get statistics() {
-    return new Map(__privateGet(this, _statistics));
+  initWinningLotto() {
+    const winningLotto = $(CUSTOM_ELEMENTS.winningLotto, this.app);
+    winningLotto.initWinningLotto();
   }
-  calculateProfitRatio(purchaseAmount) {
-    const profitAmount = Array.from(__privateGet(this, _statistics).values()).reduce(
-      (sum, { count, amount }) => sum + count * amount,
-      0
-    );
-    const PERCENTAGE = 100;
-    const DECIMAL_POINT = 1;
-    return (profitAmount / purchaseAmount * PERCENTAGE).toLocaleString(
-      "ko-KR",
-      {
-        minimumFractionDigits: DECIMAL_POINT,
-        maximumFractionDigits: DECIMAL_POINT
-      }
-    );
-  }
-  calculateWinningResults(winningNumbers, bonusNumber) {
-    __privateGet(this, _lottos).forEach((lotto) => {
-      const matchedCount = countMatchingNumbers(winningNumbers, lotto);
-      if (matchedCount === MATCH_KEY.FIVE) {
-        __privateMethod(this, _WinningStatistics_instances, addMatchedCount_fn).call(this, __privateMethod(this, _WinningStatistics_instances, calculateBonusNumber_fn).call(this, lotto, bonusNumber));
-        return;
-      }
-      __privateMethod(this, _WinningStatistics_instances, addMatchedCount_fn).call(this, matchedCount);
-    });
+  showResult(statistics, profitRatio) {
+    const lottoResult = $(CUSTOM_ELEMENTS.lottoResult, this.app);
+    lottoResult.showResult(statistics, profitRatio);
   }
 }
-_lottos = new WeakMap();
-_statistics = new WeakMap();
-_WinningStatistics_instances = new WeakSet();
-calculateBonusNumber_fn = function(lotto, bonusNumber) {
-  if (lotto.includes(bonusNumber)) return MATCH_KEY.FIVE_AND_BONUS;
-  return MATCH_KEY.FIVE;
-};
-addMatchedCount_fn = function(matchedCount) {
-  if (matchedCount >= MATCH_KEY.THREE) {
-    __privateGet(this, _statistics).set(matchedCount, {
-      ...__privateGet(this, _statistics).get(matchedCount),
-      count: __privateGet(this, _statistics).get(matchedCount).count + 1
-    });
-  }
-};
 class LottoController {
-  constructor() {
+  constructor(domain2, view2) {
     __privateAdd(this, _LottoController_instances);
-    this.lottos = [];
-    this.purchaseAmount = 0;
-    this.view = new View();
+    this.domain = domain2;
+    this.view = view2;
     __privateMethod(this, _LottoController_instances, setEvent_fn).call(this);
   }
 }
@@ -687,42 +725,23 @@ setEvent_fn = function() {
   );
 };
 handlePurchase_fn = function(event) {
-  __privateMethod(this, _LottoController_instances, setPurchaseAmount_fn).call(this, event);
-  this.lottos = issueLottos(this.purchaseAmount);
-  __privateMethod(this, _LottoController_instances, updateIssuedLotto_fn).call(this);
-  __privateMethod(this, _LottoController_instances, initWinningLotto_fn).call(this);
-};
-setPurchaseAmount_fn = function(event) {
   const { purchaseAmount } = event.detail;
-  this.purchaseAmount = purchaseAmount;
-};
-updateIssuedLotto_fn = function() {
-  const issuedLotto = $(CUSTOM_ELEMENTS.issuedLotto, this.view.app);
-  issuedLotto.updateLottos(this.lottos);
-};
-initWinningLotto_fn = function() {
-  const winningLotto = $(CUSTOM_ELEMENTS.winningLotto, this.view.app);
-  winningLotto.initWinningLotto();
+  this.domain.setPurchaseAmount(purchaseAmount);
+  this.domain.issueLottos();
+  this.view.updateIssuedLotto(this.domain.lottos);
+  this.view.initWinningLotto();
 };
 handleResult_fn = function(event) {
-  const winningStatistics = __privateMethod(this, _LottoController_instances, calculateWinningStatistics_fn).call(this, event);
-  const profitRatio = __privateMethod(this, _LottoController_instances, calculateProfitRatio_fn).call(this, winningStatistics);
-  __privateMethod(this, _LottoController_instances, showResult_fn).call(this, winningStatistics, profitRatio);
-};
-calculateWinningStatistics_fn = function(event) {
   const { winningNumbers, bonusNumber } = event.detail;
-  const winningStatistics = new WinningStatistics(this.lottos);
-  winningStatistics.calculateWinningResults(winningNumbers, bonusNumber);
-  return winningStatistics;
-};
-calculateProfitRatio_fn = function(winningStatistics) {
-  return winningStatistics.calculateProfitRatio(this.purchaseAmount);
-};
-showResult_fn = function(winningStatistics, profitRatio) {
-  const lottoResult = $(CUSTOM_ELEMENTS.lottoResult, this.view.app);
-  lottoResult.showResult(winningStatistics.statistics, profitRatio);
+  const { statistics, profitRatio } = this.domain.calculateWinningStatistics(
+    winningNumbers,
+    bonusNumber
+  );
+  this.view.showResult(statistics, profitRatio);
 };
 handleRestart_fn = function() {
   this.view.render();
 };
-new LottoController();
+const domain = new LottoDomain();
+const view = new View();
+new LottoController(domain, view);
