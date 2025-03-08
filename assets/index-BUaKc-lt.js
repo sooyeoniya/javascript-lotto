@@ -6,7 +6,7 @@ var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read fr
 var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
 var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "access private method"), method);
-var _lottos, _statistics, _WinningStatistics_instances, calculateBonusNumber_fn, addMatchedCount_fn, _purchaseAmount, _lottos2, _LottoPurchase_instances, handleSubmit_fn, handleValidation_fn, _WinningLotto_instances, setFormEventListeners_fn, setInputEventListeners_fn, handleSubmit_fn2, handleValidation_fn2, getWinningAndBonusNumbers_fn, _LottoResult_instances, manageEventListeners_fn, closeDialog_fn, restartGame_fn, _LottoController_instances, setEvent_fn, handlePurchase_fn, handleResult_fn, handleRestart_fn;
+var _lottos, _statistics, _WinningStatistics_instances, calculateBonusNumber_fn, addMatchedCount_fn, _purchaseAmount, _lottos2, _LottoPurchase_instances, handleSubmit_fn, handleValidation_fn, _WinningLotto_instances, setFormEventListeners_fn, setInputEventListeners_fn, handleSubmit_fn2, handleValidation_fn2, getWinningAndBonusNumbers_fn, _LottoResult_instances, manageEventListeners_fn, closeDialog_fn, restartGame_fn, _View_instances, cacheElements_fn, initMainContainer_fn, _LottoController_instances, setEvent_fn, handlePurchase_fn, handleResult_fn, handleRestart_fn;
 (function polyfill() {
   const relList = document.createElement("link").relList;
   if (relList && relList.supports && relList.supports("modulepreload")) {
@@ -99,6 +99,7 @@ const STYLE_SELECTORS = Object.freeze({
   hidden: "hidden"
 });
 const CUSTOM_ELEMENTS = Object.freeze({
+  mainContainer: "main-container",
   lottoHeader: "lotto-header",
   lottoPurchase: "lotto-purchase",
   issuedLotto: "issued-lotto",
@@ -287,12 +288,6 @@ const hideElement = (el) => {
 const renderElement = (el) => {
   el.classList.remove(STYLE_SELECTORS.hidden);
 };
-const $ = (selector, target = document) => {
-  return target.querySelector(selector);
-};
-const $$ = (selector, target = document) => {
-  return target.querySelectorAll(selector);
-};
 const eventOn = ({ target, eventType }, eventListener) => {
   target.addEventListener(eventType, eventListener);
 };
@@ -355,7 +350,7 @@ class LottoPurchase extends BaseWebComponent {
     `;
   }
   setEvent() {
-    const form = $(".lotto-purchase__form", this);
+    const form = this.querySelector(".lotto-purchase__form");
     eventOn(
       { target: form, eventType: EVENT_TYPES.submit },
       __privateMethod(this, _LottoPurchase_instances, handleSubmit_fn).bind(this)
@@ -365,8 +360,10 @@ class LottoPurchase extends BaseWebComponent {
 _LottoPurchase_instances = new WeakSet();
 handleSubmit_fn = function(event) {
   event.preventDefault();
-  const purchaseAmountInput = $(".lotto-purchase__input", this).value;
-  const errorElement = $(".lotto-purchase__error", this);
+  const purchaseAmountInput = this.querySelector(
+    ".lotto-purchase__input"
+  ).value;
+  const errorElement = this.querySelector(".lotto-purchase__error");
   __privateMethod(this, _LottoPurchase_instances, handleValidation_fn).call(this, purchaseAmountInput, errorElement);
 };
 handleValidation_fn = function(purchaseAmountInput, errorElement) {
@@ -386,11 +383,8 @@ class IssuedLotto extends BaseWebComponent {
     this.lottos = [];
   }
   getTemplate() {
-    if (this.lottos.length === 0) {
-      return "";
-    }
     return `
-      <section class="issued-lotto">
+      <section class="issued-lotto ${STYLE_SELECTORS.hidden}">
         <p class="issued-lotto__description">총 ${this.lottos.length}개를 구매하였습니다.</p>
         <ul class="issued-lotto__list">
           ${this.lottos.map(
@@ -492,14 +486,10 @@ class WinningLotto extends BaseWebComponent {
   constructor() {
     super();
     __privateAdd(this, _WinningLotto_instances);
-    this.isInitialized = false;
   }
   getTemplate() {
-    if (!this.isInitialized) {
-      return "";
-    }
     return `
-      <section class="winning-lotto">
+      <section class="winning-lotto ${STYLE_SELECTORS.hidden}">
         <p class="winning-lotto__description">
           지난 주 당첨번호 6개와 보너스 번호 1개를 입력해주세요.
         </p>
@@ -527,7 +517,6 @@ class WinningLotto extends BaseWebComponent {
       `;
   }
   initWinningLotto() {
-    this.isInitialized = true;
     this.connectedCallback();
   }
   setEvent() {
@@ -537,7 +526,7 @@ class WinningLotto extends BaseWebComponent {
 }
 _WinningLotto_instances = new WeakSet();
 setFormEventListeners_fn = function() {
-  const form = $(".winning-lotto__form", this);
+  const form = this.querySelector(".winning-lotto__form");
   if (form) {
     eventOn(
       { target: form, eventType: EVENT_TYPES.submit },
@@ -546,7 +535,7 @@ setFormEventListeners_fn = function() {
   }
 };
 setInputEventListeners_fn = function() {
-  const inputs = $$(".winning-lotto__input", this);
+  const inputs = this.querySelectorAll(".winning-lotto__input");
   inputs.forEach((input, index) => {
     eventOn({ target: input, eventType: EVENT_TYPES.input }, () => {
       const maxLength = input.getAttribute("maxlength");
@@ -559,7 +548,7 @@ setInputEventListeners_fn = function() {
 handleSubmit_fn2 = function(event) {
   event.preventDefault();
   const { winningNumbersInput, bonusNumberInput } = __privateMethod(this, _WinningLotto_instances, getWinningAndBonusNumbers_fn).call(this);
-  const errorElement = $(".winning-lotto__error", this);
+  const errorElement = this.querySelector(".winning-lotto__error");
   __privateMethod(this, _WinningLotto_instances, handleValidation_fn2).call(this, winningNumbersInput, bonusNumberInput, errorElement);
 };
 handleValidation_fn2 = function(winningNumbersInput, bonusNumberInput, errorElement) {
@@ -574,14 +563,12 @@ handleValidation_fn2 = function(winningNumbersInput, bonusNumberInput, errorElem
   }
 };
 getWinningAndBonusNumbers_fn = function() {
-  const inputs = $$(
-    ".winning-lotto__winning-numbers .winning-lotto__input",
-    this
+  const inputs = this.querySelectorAll(
+    ".winning-lotto__winning-numbers .winning-lotto__input"
   );
   const winningNumbersInput = Array.from(inputs).map((input) => input.value).join(",");
-  const bonusNumberInput = $(
-    ".winning-lotto__bonus-number .winning-lotto__input",
-    this
+  const bonusNumberInput = this.querySelector(
+    ".winning-lotto__bonus-number .winning-lotto__input"
   ).value;
   return { winningNumbersInput, bonusNumberInput };
 };
@@ -631,7 +618,7 @@ class LottoResult extends BaseWebComponent {
     this.statistics = statistics;
     this.profitRatio = profitRatio;
     this.render();
-    const dialog = $("dialog", this);
+    const dialog = this.querySelector("dialog");
     dialog.showModal();
     this.setEvent();
   }
@@ -644,8 +631,8 @@ class LottoResult extends BaseWebComponent {
 }
 _LottoResult_instances = new WeakSet();
 manageEventListeners_fn = function(eventMethod) {
-  const closeButton = $(".lotto-result__close-button", this);
-  const restartButton = $(".lotto-result__restart-button", this);
+  const closeButton = this.querySelector(".lotto-result__close-button");
+  const restartButton = this.querySelector(".lotto-result__restart-button");
   if (closeButton) {
     eventMethod(
       { target: closeButton, eventType: EVENT_TYPES.click },
@@ -660,7 +647,7 @@ manageEventListeners_fn = function(eventMethod) {
   }
 };
 closeDialog_fn = function() {
-  const dialog = $("dialog", this);
+  const dialog = this.querySelector("dialog");
   dialog.close();
   this.removeEvent();
 };
@@ -669,38 +656,73 @@ restartGame_fn = function() {
   this.removeEvent();
 };
 customElements.define(CUSTOM_ELEMENTS.lottoResult, LottoResult);
-class View {
+class MainContainer extends BaseWebComponent {
   constructor() {
-    this.app = $("#app");
-    this.render();
+    super();
   }
-  render() {
-    this.app.innerHTML = `
-    <lotto-header></lotto-header>
-    <div class="container">
+  getTemplate() {
+    return `
       <main>
         <lotto-purchase></lotto-purchase>
         <issued-lotto></issued-lotto>
         <winning-lotto></winning-lotto>
         <lotto-result></lotto-result>
       </main>
-    </div>
+    `;
+  }
+  reset() {
+    this.render();
+    this.initComponents();
+  }
+  initComponents() {
+    const issuedLotto = this.querySelector(CUSTOM_ELEMENTS.issuedLotto);
+    const winningLotto = this.querySelector(CUSTOM_ELEMENTS.winningLotto);
+    hideElement(issuedLotto);
+    hideElement(winningLotto);
+  }
+}
+customElements.define(CUSTOM_ELEMENTS.mainContainer, MainContainer);
+class View {
+  constructor() {
+    __privateAdd(this, _View_instances);
+    this.app = document.querySelector("#app");
+    this.render();
+    __privateMethod(this, _View_instances, cacheElements_fn).call(this);
+    __privateMethod(this, _View_instances, initMainContainer_fn).call(this);
+  }
+  render() {
+    this.app.innerHTML = `
+    <lotto-header></lotto-header>
+    <main-container class="container"></main-container>
     <lotto-footer></lotto-footer>
     `;
   }
   updateIssuedLotto(lottos) {
-    const issuedLotto = $(CUSTOM_ELEMENTS.issuedLotto, this.app);
-    issuedLotto.updateLottos(lottos);
+    this.issuedLotto.updateLottos(lottos);
+    renderElement(this.issuedLotto);
   }
   initWinningLotto() {
-    const winningLotto = $(CUSTOM_ELEMENTS.winningLotto, this.app);
-    winningLotto.initWinningLotto();
+    this.winningLotto.initWinningLotto();
+    renderElement(this.winningLotto);
   }
   showResult(statistics, profitRatio) {
-    const lottoResult = $(CUSTOM_ELEMENTS.lottoResult, this.app);
-    lottoResult.showResult(statistics, profitRatio);
+    this.lottoResult.showResult(statistics, profitRatio);
+  }
+  restartLotto() {
+    this.mainContainer.reset();
+    __privateMethod(this, _View_instances, cacheElements_fn).call(this);
   }
 }
+_View_instances = new WeakSet();
+cacheElements_fn = function() {
+  this.mainContainer = this.app.querySelector(CUSTOM_ELEMENTS.mainContainer);
+  this.issuedLotto = this.app.querySelector(CUSTOM_ELEMENTS.issuedLotto);
+  this.winningLotto = this.app.querySelector(CUSTOM_ELEMENTS.winningLotto);
+  this.lottoResult = this.app.querySelector(CUSTOM_ELEMENTS.lottoResult);
+};
+initMainContainer_fn = function() {
+  this.mainContainer.initComponents();
+};
 class LottoController {
   constructor(domain2, view2) {
     __privateAdd(this, _LottoController_instances);
@@ -740,7 +762,7 @@ handleResult_fn = function(event) {
   this.view.showResult(statistics, profitRatio);
 };
 handleRestart_fn = function() {
-  this.view.render();
+  this.view.restartLotto();
 };
 const domain = new LottoDomain();
 const view = new View();
